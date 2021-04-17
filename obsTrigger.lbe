@@ -1,0 +1,129 @@
+[extension_name]
+OBS Triggers
+[insert_external]
+<div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/obs-websocket-js@4.0.2/dist/obs-websocket.js"></script>
+  <h2>OBS Triggers by BasicMilky - Version 1.0</h2>
+
+  <p>List of extension triggers:</p>
+  <dl>
+    <dt>OBST - Stream Started <button type="button" onclick="sendTrigger('Stream Started')">Test</button></dt>
+    <dd>Gets called when stream starts</dd>
+    <dt>OBST - Stream Stopped <button type="button" onclick="sendTrigger('Stream Stopped')">Test</button></dt>
+    <dd>Gets called when stream succesfully stopped</dd>
+    <dt>OBST - Recording Started <button type="button" onclick="sendTrigger('Recording Started')">Test</button></dt>
+    <dd>Gets called when recording successfully started</dd>
+    <dt>OBST - Recording Stopped <button type="button" onclick="sendTrigger('Recording Stopped')">Test</button></dt>
+    <dd>Gets called when recording is stopped</dd>
+    <dt>OBST - Recording Paused <button type="button" onclick="sendTrigger('Recording Paused')">Test</button></dt>
+    <dd>Gets called when recording gets paused</dd>
+    <dt>OBST - Recording Resumed <button type="button" onclick="sendTrigger('Recording Resumed')">Test</button></dt>
+    <dd>Gets called when recording gets resumed</dd>
+    <dt>OBST - OBS Exiting <button type="button" onclick="sendTrigger('OBS Exiting')">Test</button></dt>
+    <dd>Gets called when user quits out of OBS. Note: This will disconnect the connection to OBS for the extension</dd>
+  </dl>
+</div>
+[insert_command]
+lioranboardclient.send('{"type":"MESSAGE","topic":"ExtensionCommand","name":"OBSTriggers","boxcount":2,"boxname1": "obswsURL",	"boxtype1": "string",	"boxname2": "obswsPass", "boxtype2": "string"}');
+
+[insert_hook]
+case "OBSTriggers":{
+	startupInit(LioranBoardJSON.obswsURL, LioranBoardJSON.obswsPass);
+}break
+
+[insert_script]
+async function startupInit(obswsURL, obswsPass) {
+    lioranboardclient.send(`{"type":"MESSAGE","topic":"AlertMessage","message":"Setting up OBSTriggers"}`)
+   
+    obswsURL = obswsURL || 'localhost:4444';
+    obswsPass = obswsPass || '';
+    
+    const obs = new OBSWebSocket();
+  
+    obs.connect({
+      address: obswsURL,
+      password: obswsPass
+    });
+
+    obs.on('AuthenticationSuccess', async () => {
+        
+        obs.on('StreamStarting', () => {
+            sendTrigger('Stream Started');
+        });
+        obs.on('StreamStopped', () => {
+            sendTrigger('Stream Stopped');
+        });
+        obs.on('RecordingStarted', () => {
+            sendTrigger('Recording Started');
+        });
+        obs.on('RecordingStopped', () => {
+            sendTrigger('Recording Stopped');
+        });
+        obs.on('RecordingPaused', () => {
+            sendTrigger('Recording Paused');
+        });
+        obs.on('RecordingResumed', () => {
+            sendTrigger('Recording Resumed');
+        });
+        obs.on('Exiting', () => {
+            sendTrigger('OBS Exiting');
+        
+            obs.disconnect(); 
+        });
+
+        lioranboardclient.send(`{"type":"MESSAGE","topic":"AlertMessage","message":"OBS Triggers: Init complete!"}`);
+    });
+}
+
+function sendTrigger(triggerName){
+    lioranboardclient.send(`{"type":"MESSAGE","topic":"AlertMessage","message":"OBS Triggers: ${triggerName}!"}`);
+    lioranboardclient.send(`{"type":"MESSAGE","topic":"ExtensionTrigger","trigger":"OBST - ${triggerName}"}`);
+}
+[insert_over]
+[buttons_0x0]
+activepress="0.000000"
+border_size="0.000000"
+combine="0.000000"
+type="websocketaction+pubsubaction+"
+picture=""
+text="Init OBSTriggers"
+color="12122320.000000"
+button_id="ID2"
+extensiontrigger0="!obsalways"
+pubsubaction0="7.000000"
+pubsubqueue="0.000000"
+websocketdelay2="0.000000"
+websocketvalue8_2=""
+websocketvalue7_2=""
+websocketvalue6_2=""
+websocketvalue5_2=""
+websocketvalue4_2=""
+websocketvalue3_2=""
+websocketvalue2_2="localhost:4444"
+websocketvalue1_2="OBSTriggers"
+websocketaction2="71.000000"
+websocketdelay1="0.000000"
+websocketvalue8_1=""
+websocketvalue7_1=""
+websocketvalue6_1=""
+websocketvalue5_1=""
+websocketvalue4_1=""
+websocketvalue3_1=""
+websocketvalue2_1=""
+websocketvalue1_1="You can find your obs websocket info at Tools > Websocket Server Settings"
+websocketaction1="92.000000"
+websocketdelay0="0.000000"
+websocketvalue8_0=""
+websocketvalue7_0=""
+websocketvalue6_0=""
+websocketvalue5_0=""
+websocketvalue4_0=""
+websocketvalue3_0=""
+websocketvalue2_0=""
+websocketvalue1_0="Feel free to copy-paste this button to other decks!"
+websocketaction0="92.000000"
+[configs]
+name="OBSTriggers Setup"
+background_color="2516791.000000"
+grid_height="1.000000"
+grid_width="1.000000"
