@@ -3,7 +3,7 @@ OBS Triggers
 [insert_external]
 <div>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/obs-websocket-js@4.0.2/dist/obs-websocket.js"></script>
-  <h2>OBS Triggers by BasicMilky - Version 1.0</h2>
+  <h2>OBS Triggers by BasicMilky - Version 1.1</h2>
 
   <p>List of extension triggers:</p>
   <dl>
@@ -19,6 +19,10 @@ OBS Triggers
     <dd>Gets called when recording gets paused</dd>
     <dt>OBST - Recording Resumed <button type="button" onclick="sendTrigger('Recording Resumed')">Test</button></dt>
     <dd>Gets called when recording gets resumed</dd>
+    <dt>OBST - Scene Switched <button type="button" onclick="sendTrigger('Scene Switched', {sceneName: inextscene.value})">Test</button></dt>
+    <dd><input type="text" id="inextscene" name="nnextscene" value="New scene">
+        <br>Gets called when user switches scenes. It is recommended to use Lioranboard's triggers if you need a specific scene. 
+        <br><br>Trigger Pull: New scene</dd>
     <dt>OBST - OBS Exiting <button type="button" onclick="sendTrigger('OBS Exiting')">Test</button></dt>
     <dd>Gets called when user quits out of OBS. Note: This will disconnect the connection to OBS for the extension</dd>
   </dl>
@@ -65,9 +69,11 @@ async function startupInit(obswsURL, obswsPass) {
         obs.on('RecordingResumed', () => {
             sendTrigger('Recording Resumed');
         });
+        obs.on('SwitchScenes', data => {
+            sendTrigger('Scene Switched', data);
+        });
         obs.on('Exiting', () => {
             sendTrigger('OBS Exiting');
-        
             obs.disconnect(); 
         });
 
@@ -75,9 +81,12 @@ async function startupInit(obswsURL, obswsPass) {
     });
 }
 
-function sendTrigger(triggerName){
+function sendTrigger(triggerName, data){
     lioranboardclient.send(`{"type":"MESSAGE","topic":"AlertMessage","message":"OBS Triggers: ${triggerName}!"}`);
-    lioranboardclient.send(`{"type":"MESSAGE","topic":"ExtensionTrigger","trigger":"OBST - ${triggerName}"}`);
+    if(data === undefined)
+        lioranboardclient.send(`{"type":"MESSAGE","topic":"ExtensionTrigger","trigger":"OBST - ${triggerName}"}`);
+    else
+        lioranboardclient.send(`{"type":"MESSAGE","topic":"ExtensionTrigger","trigger":"OBST - ${triggerName}", "value1":"${data.sceneName}"}`);
 }
 [insert_over]
 [buttons_0x0]
